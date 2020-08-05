@@ -1,0 +1,1321 @@
+<!DOCTYPE html>
+<script src="/js/clicklove.js"></script>
+<html  lang="zh">
+<head>
+    <meta charset="utf-8" />
+
+<meta name="generator" content="Hexo 3.7.1" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+<title>对接支付宝支付接口开发笔记 - Qroxy</title>
+
+
+    <meta name="description" content="支付宝对接学习笔记：  功能介绍：  支付宝对接 支付宝回调 查询支付状态（略过不讲）  要求：  熟悉支付宝对接核心文档，调通支付宝官方Demo 解析支付宝SDK对接源码 RSA1和RSA2验证签名及加解密 避免支付宝的重复通知而加数据校验（略）  技巧：  ngrok 外网穿透 生成二维码并持久化到图片服务器  调试完demo后，集合到开发项目。把支付宝依赖的jar宝按照提供版本要求导入，sd">
+<meta property="og:type" content="article">
+<meta property="og:title" content="对接支付宝支付接口开发笔记">
+<meta property="og:url" content="http://qroxy.cn/2018/10/17/对接支付宝支付接口开发笔记/index.html">
+<meta property="og:site_name" content="Qroxy">
+<meta property="og:description" content="支付宝对接学习笔记：  功能介绍：  支付宝对接 支付宝回调 查询支付状态（略过不讲）  要求：  熟悉支付宝对接核心文档，调通支付宝官方Demo 解析支付宝SDK对接源码 RSA1和RSA2验证签名及加解密 避免支付宝的重复通知而加数据校验（略）  技巧：  ngrok 外网穿透 生成二维码并持久化到图片服务器  调试完demo后，集合到开发项目。把支付宝依赖的jar宝按照提供版本要求导入，sd">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://qroxy.cn/images/og_image.png">
+<meta property="og:updated_time" content="2019-08-21T00:58:31.859Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="对接支付宝支付接口开发笔记">
+<meta name="twitter:description" content="支付宝对接学习笔记：  功能介绍：  支付宝对接 支付宝回调 查询支付状态（略过不讲）  要求：  熟悉支付宝对接核心文档，调通支付宝官方Demo 解析支付宝SDK对接源码 RSA1和RSA2验证签名及加解密 避免支付宝的重复通知而加数据校验（略）  技巧：  ngrok 外网穿透 生成二维码并持久化到图片服务器  调试完demo后，集合到开发项目。把支付宝依赖的jar宝按照提供版本要求导入，sd">
+<meta name="twitter:image" content="http://qroxy.cn/images/og_image.png">
+
+
+
+
+
+
+
+<link rel="icon" href="/images/avatar.png">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/atom-one-light.css">
+
+
+    
+    
+    
+    <style>body>.footer,body>.navbar,body>.section{opacity:0}</style>
+    
+
+    
+    
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css">
+    
+
+    
+    
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css">
+
+
+    
+    
+    
+    
+
+<link rel="stylesheet" href="/css/back-to-top.css">
+
+
+    
+    
+
+    
+    
+    
+    
+
+    
+    
+<link rel="stylesheet" href="/css/progressbar.css">
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+
+    
+    
+    
+
+
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+<body class="is-3-column">
+    <nav class="navbar navbar-main">
+    <div class="container">
+        <div class="navbar-brand is-flex-center">
+            <a class="navbar-item navbar-logo" href="/">
+            
+                <img src="/images/avatar.png" alt="对接支付宝支付接口开发笔记" height="28">
+            
+            </a>
+        </div>
+        <div class="navbar-menu">
+            
+            <div class="navbar-start">
+                
+                <a class="navbar-item"
+                href="/">首页</a>
+                
+                <a class="navbar-item"
+                href="/archives">归档</a>
+                
+                <a class="navbar-item"
+                href="/categories">分类</a>
+                
+                <a class="navbar-item"
+                href="/tags">标签</a>
+                
+                <a class="navbar-item"
+                href="/about">个人简历</a>
+                
+            </div>
+            
+            <div class="navbar-end">
+                
+                    
+                    
+                    <a class="navbar-item" target="_blank" title="Download on GitHub" href="https://github.com/Qroxyquan">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                    
+                
+                
+                
+                <a class="navbar-item search" title="搜索" href="javascript:;">
+                    <i class="fas fa-search"></i>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-tablet is-8-desktop is-6-widescreen has-order-2 column-main"><div class="card">
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+
+            <div class="level-left">
+                <time class="level-item has-text-grey" datetime="2018-10-17T12:42:47.000Z">2018-10-17</time>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    25 分钟 读完 (大约 3740 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+                对接支付宝支付接口开发笔记
+            
+        </h1>
+        <div class="content">
+            <p><strong>支付宝对接学习笔记</strong>： </p>
+<p><em>功能介绍：</em></p>
+<ul>
+<li>支付宝对接</li>
+<li>支付宝回调</li>
+<li>查询支付状态（略过不讲）</li>
+</ul>
+<p><em>要求：</em></p>
+<ul>
+<li>熟悉支付宝对接核心文档，调通支付宝官方Demo</li>
+<li>解析支付宝SDK对接源码</li>
+<li>RSA1和RSA2验证签名及加解密</li>
+<li>避免支付宝的重复通知而加数据校验（略）</li>
+</ul>
+<p><em>技巧：</em></p>
+<ul>
+<li>ngrok 外网穿透</li>
+<li>生成二维码并持久化到图片服务器</li>
+</ul>
+<p>调试完demo后，集合到开发项目。<br>把支付宝依赖的jar宝按照提供版本要求导入，sdk则放在web下lib文件夹下。然后在module的依赖中导入lib下的本地jar包（坑！！不然会报红）<br>那么为什么不统一使用pom导入呢？原因就是阿里没有提供该jar包的线上导入，只能本地导入。为了统一jar地址，所以必须先配置sdk的jar包的位置。（在这之前还要配置一个maven插件以加载本地jar包）.<br><a id="more"></a></p>
+<h4 id="接下来简单梳理一遍流程："><a href="#接下来简单梳理一遍流程：" class="headerlink" title="接下来简单梳理一遍流程："></a>接下来简单梳理一遍流程：</h4><h4 id="一、登录进入蚂蚁金服"><a href="#一、登录进入蚂蚁金服" class="headerlink" title="一、登录进入蚂蚁金服 "></a>一、登录进入<a href="https://openhome.alipay.com/platform/appDaily.htm?tab=info" target="_blank" rel="noopener">蚂蚁金服 </a></h4><p>本次使用沙箱环境下进行整合，沙箱环境开发上线流程差别不大，和正式几乎是一致的，只是切换不同的APPID和支付宝网关。<br><img src="https://upload-images.jianshu.io/upload_images/5391552-a638486e9ef2a522.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<h4 id="二、下载官方的demo"><a href="#二、下载官方的demo" class="headerlink" title="二、下载官方的demo"></a>二、下载官方的demo</h4><p>这里选中java版的demo<br><img src="https://upload-images.jianshu.io/upload_images/5391552-85253ddf76f96bfa.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<p>选中idea导入。先在本地调通再集成到系统中去。<br><img src="https://upload-images.jianshu.io/upload_images/5391552-f22d8c28033908b2.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<p>右键运行主函数会发现运行不了，那是因为我们还没有修改配置文件中设置。 </p>
+<p>对应配置如下。<br><img src="https://upload-images.jianshu.io/upload_images/5391552-c43d65edde813189.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<p>那么问题来了怎么生成这些公钥私钥呢？前往<a href="https://docs.open.alipay.com/291/105971" target="_blank" rel="noopener">这里</a>根据系统下载对应的工具。<br><img src="https://upload-images.jianshu.io/upload_images/5391552-b9b27d1e463fe962.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<p>接着：<br><img src="https://upload-images.jianshu.io/upload_images/5391552-57c99681b8c42c17.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"><br>配置好配置文件后，运行一下：<br><img src="https://upload-images.jianshu.io/upload_images/5391552-bc5a099cfe2e15e6.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"><br>运行没有问题，证明已经调通。下载沙箱版的支付宝，登录沙箱提供的买家账户，复制当面付二维码找一个<a href="https://cli.im" target="_blank" rel="noopener">二维码生成工具</a>扫描支付看能不能成功。<br><img src="https://upload-images.jianshu.io/upload_images/5391552-3c5684b224133160.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<p>扫描支付后：<br><img src="https://upload-images.jianshu.io/upload_images/5391552-646730cc1ec98496.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"><br>到此为止本地支付宝已经调通，这个还是相对来说比较简单的。从demo的项目结构来看，这是一个web项目，可以自行配置运行环境再运行，测试会更加方便一点，如果没有出错的话就会出现下图：<br><img src="https://upload-images.jianshu.io/upload_images/5391552-ef92a65754ac1d9a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"><br><img src="https://upload-images.jianshu.io/upload_images/5391552-a2689821cf92d58f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<h4 id="三、系统对接支付宝支付接口"><a href="#三、系统对接支付宝支付接口" class="headerlink" title="三、系统对接支付宝支付接口"></a>三、系统对接支付宝支付接口</h4><p>虽然官网已经写得很清楚了，但是第一次对接还是很吃力，这里写一下思路：</p>
+<h5 id="1、先把demo中的aplipay那个包及配置文件复制放到需要集成项目的类路径下："><a href="#1、先把demo中的aplipay那个包及配置文件复制放到需要集成项目的类路径下：" class="headerlink" title="1、先把demo中的aplipay那个包及配置文件复制放到需要集成项目的类路径下："></a>1、先把demo中的aplipay那个包及配置文件复制放到需要集成项目的类路径下：</h5><p><img src="https://upload-images.jianshu.io/upload_images/5391552-655e61616ecedba4.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<h5 id="2、把支付宝依赖的jar宝按照提供版本要求导入，sdk则放在web下lib文件夹下。然后在module的依赖中导入lib下的本地jar包（坑！！不然会报红）"><a href="#2、把支付宝依赖的jar宝按照提供版本要求导入，sdk则放在web下lib文件夹下。然后在module的依赖中导入lib下的本地jar包（坑！！不然会报红）" class="headerlink" title="2、把支付宝依赖的jar宝按照提供版本要求导入，sdk则放在web下lib文件夹下。然后在module的依赖中导入lib下的本地jar包（坑！！不然会报红）"></a>2、把支付宝依赖的jar宝按照提供版本要求导入，sdk则放在web下lib文件夹下。然后在module的依赖中导入lib下的本地jar包（坑！！不然会报红）</h5><p>那么为什么不统一使用pom导入呢？原因就是阿里没有提供该jar包的线上导入，只能本地导入。为了统一jar地址，所以必须先配置sdk的jar包的位置。<br><img src="https://upload-images.jianshu.io/upload_images/5391552-8b885f44672fb08f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"><br><img src="https://upload-images.jianshu.io/upload_images/5391552-c230e38f88bf6802.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"><br>还要配置一个maven插件以加载本地jar包.<br><img src="https://upload-images.jianshu.io/upload_images/5391552-f15ac3805a68a601.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<h5 id="3、运行下主函数没有报错就是初步导入成功。"><a href="#3、运行下主函数没有报错就是初步导入成功。" class="headerlink" title="3、运行下主函数没有报错就是初步导入成功。"></a>3、运行下主函数没有报错就是初步导入成功。</h5><p><img src="https://upload-images.jianshu.io/upload_images/5391552-935f3f85f9a5730f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<h4 id="四、对接支付宝支付接口"><a href="#四、对接支付宝支付接口" class="headerlink" title="四、对接支付宝支付接口"></a>四、对接支付宝支付接口</h4><h5 id="1、这里是整个过程中最难的部分。"><a href="#1、这里是整个过程中最难的部分。" class="headerlink" title="1、这里是整个过程中最难的部分。"></a>1、这里是整个过程中最难的部分。</h5><p>从下订单到支付到支付完成，省去下订单的接口，支付过程需要用到两个接口，一个是支付接口，一个是给支付宝授权回调接口。订单这里采用模拟数据。</p>
+<h5 id="2、首先支付接口"><a href="#2、首先支付接口" class="headerlink" title="2、首先支付接口"></a>2、首先支付接口</h5><p>扫码支付调用流程：</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/5391552-a0d07abe34008dd5.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<p>官方文档参数描述：<br><img src="https://upload-images.jianshu.io/upload_images/5391552-7d69b89adf9d49b8.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"><br>因此先查询数据组装支付宝要求的参数值：</p>
+<pre class=" language-java"><code class="language-java">Map<span class="token operator">&lt;</span>String<span class="token punctuation">,</span> String<span class="token operator">></span> resultMap <span class="token operator">=</span> Maps<span class="token punctuation">.</span><span class="token function">newHashMap</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        Order order <span class="token operator">=</span> orderMapper<span class="token punctuation">.</span><span class="token function">selectByUserAndOrderNo</span><span class="token punctuation">(</span>userId<span class="token punctuation">,</span> orderNo<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>order <span class="token operator">==</span> null<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">return</span> ServerRespond<span class="token punctuation">.</span><span class="token function">createByErrorMessage</span><span class="token punctuation">(</span><span class="token string">"用户没有该订单"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token punctuation">}</span>
+        resultMap<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span><span class="token string">"orderNo"</span><span class="token punctuation">,</span> String<span class="token punctuation">.</span><span class="token function">valueOf</span><span class="token punctuation">(</span>order<span class="token punctuation">.</span><span class="token function">getOrderNo</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token comment" spellcheck="true">// (必填) 商户网站订单系统中唯一订单号，64个字符以内，只能包含字母、数字、下划线，</span>
+        <span class="token comment" spellcheck="true">// 需保证商户系统端不能重复，建议通过数据库sequence生成，</span>
+        String outTradeNo <span class="token operator">=</span> order<span class="token punctuation">.</span><span class="token function">getOrderNo</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token comment" spellcheck="true">// (必填) 订单标题，粗略描述用户的支付目的。如“xxx品牌xxx门店当面付扫码消费”</span>
+        String subject <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">StringBuilder</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token string">"寸金在线商城，订单号："</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span>outTradeNo<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token comment" spellcheck="true">// (必填) 订单总金额，单位为元，不能超过1亿元</span>
+        <span class="token comment" spellcheck="true">// 如果同时传入了【打折金额】,【不可打折金额】,【订单总金额】三者,则必须满足如下条件:【订单总金额】=【打折金额】+【不可打折金额】</span>
+        String totalAmount <span class="token operator">=</span> order<span class="token punctuation">.</span><span class="token function">getPayment</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token comment" spellcheck="true">// (可选) 订单不可打折金额，可以配合商家平台配置折扣活动，如果酒水不参与打折，则将对应金额填写至此字段</span>
+        <span class="token comment" spellcheck="true">// 如果该值未传入,但传入了【订单总金额】,【打折金额】,则该值默认为【订单总金额】-【打折金额】</span>
+        String undiscountableAmount <span class="token operator">=</span> <span class="token string">"0"</span><span class="token punctuation">;</span>
+
+        <span class="token comment" spellcheck="true">// 卖家支付宝账号ID，用于支持一个签约账号下支持打款到不同的收款账号，(打款到sellerId对应的支付宝账号)</span>
+        <span class="token comment" spellcheck="true">// 如果该字段为空，则默认为与支付宝签约的商户的PID，也就是appid对应的PID</span>
+        String sellerId <span class="token operator">=</span> <span class="token string">""</span><span class="token punctuation">;</span>
+
+        <span class="token comment" spellcheck="true">// 订单描述，可以对交易或商品进行一个详细地描述，比如填写"购买商品2件共15.00元"</span>
+        String body <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">StringBuilder</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token string">"订单"</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span>outTradeNo<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token string">"购买商品共"</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span>totalAmount<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token string">"元"</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token comment" spellcheck="true">// 商户操作员编号，添加此参数可以为商户操作员做销售统计</span>
+        String operatorId <span class="token operator">=</span> <span class="token string">"test_operator_id"</span><span class="token punctuation">;</span>
+
+        <span class="token comment" spellcheck="true">// (必填) 商户门店编号，通过门店号和商家后台可以配置精准到门店的折扣信息，详询支付宝技术支持</span>
+        String storeId <span class="token operator">=</span> <span class="token string">"test_store_id"</span><span class="token punctuation">;</span>
+
+        <span class="token comment" spellcheck="true">// 业务扩展参数，目前可添加由支付宝分配的系统商编号(通过setSysServiceProviderId方法)，详情请咨询支付宝技术支持</span>
+        ExtendParams extendParams <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ExtendParams</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        extendParams<span class="token punctuation">.</span><span class="token function">setSysServiceProviderId</span><span class="token punctuation">(</span><span class="token string">"2088100200300400500"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token comment" spellcheck="true">// 支付超时，定义为120分钟</span>
+        String timeoutExpress <span class="token operator">=</span> <span class="token string">"120m"</span><span class="token punctuation">;</span>
+
+        <span class="token comment" spellcheck="true">// 商品明细列表，需填写购买商品详细信息，</span>
+        List<span class="token operator">&lt;</span>GoodsDetail<span class="token operator">></span> goodsDetailList <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ArrayList</span><span class="token operator">&lt;</span>GoodsDetail<span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        List<span class="token operator">&lt;</span>OrderItem<span class="token operator">></span> orderItemList <span class="token operator">=</span> orderItemMapper<span class="token punctuation">.</span><span class="token function">getByOrderNoUserId</span><span class="token punctuation">(</span>orderNo<span class="token punctuation">,</span> userId<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        System<span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>orderItemList<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">for</span> <span class="token punctuation">(</span>OrderItem orderItem <span class="token operator">:</span> orderItemList<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+
+            GoodsDetail goods <span class="token operator">=</span> GoodsDetail<span class="token punctuation">.</span><span class="token function">newInstance</span><span class="token punctuation">(</span>orderItem<span class="token punctuation">.</span><span class="token function">getProductId</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> orderItem<span class="token punctuation">.</span><span class="token function">getProductName</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+
+                    BigDecimalUtil<span class="token punctuation">.</span><span class="token function">mul</span><span class="token punctuation">(</span>orderItem<span class="token punctuation">.</span><span class="token function">getCurrentUnitPrice</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">doubleValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">Double</span><span class="token punctuation">(</span><span class="token number">100</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">doubleValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">longValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> orderItem<span class="token punctuation">.</span><span class="token function">getQuantity</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            goodsDetailList<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>goods<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+
+<span class="token comment" spellcheck="true">//        // 创建一个商品信息，参数含义分别为商品id（使用国标）、名称、单价（单位为分）、数量，如果需要添加商品类别，详见GoodsDetail</span>
+<span class="token comment" spellcheck="true">//        GoodsDetail goods1 = GoodsDetail.newInstance("goods_id001", "xxx小面包", 1000, 1);</span>
+<span class="token comment" spellcheck="true">//        // 创建好一个商品后添加至商品明细列表</span>
+<span class="token comment" spellcheck="true">//        goodsDetailList.add(goods1);</span>
+<span class="token comment" spellcheck="true">//</span>
+<span class="token comment" spellcheck="true">//        // 继续创建并添加第一条商品信息，用户购买的产品为“黑人牙刷”，单价为5.00元，购买了两件</span>
+<span class="token comment" spellcheck="true">//        GoodsDetail goods2 = GoodsDetail.newInstance("goods_id002", "xxx牙刷", 500, 2);</span>
+<span class="token comment" spellcheck="true">//        goodsDetailList.add(goods2);</span>
+
+        <span class="token comment" spellcheck="true">// 创建扫码支付请求builder，设置请求参数</span>
+        AlipayTradePrecreateRequestBuilder builder <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">AlipayTradePrecreateRequestBuilder</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">setSubject</span><span class="token punctuation">(</span>subject<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">setTotalAmount</span><span class="token punctuation">(</span>totalAmount<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">setOutTradeNo</span><span class="token punctuation">(</span>outTradeNo<span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">setUndiscountableAmount</span><span class="token punctuation">(</span>undiscountableAmount<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">setSellerId</span><span class="token punctuation">(</span>sellerId<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">setBody</span><span class="token punctuation">(</span>body<span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">setOperatorId</span><span class="token punctuation">(</span>operatorId<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">setStoreId</span><span class="token punctuation">(</span>storeId<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">setExtendParams</span><span class="token punctuation">(</span>extendParams<span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">setTimeoutExpress</span><span class="token punctuation">(</span>timeoutExpress<span class="token punctuation">)</span>
+
+                <span class="token punctuation">.</span><span class="token function">setNotifyUrl</span><span class="token punctuation">(</span>PropertiesUtil<span class="token punctuation">.</span><span class="token function">getProperty</span><span class="token punctuation">(</span><span class="token string">"alipay.callback.url"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token comment" spellcheck="true">//支付宝服务器主动通知商户服务器里指定的页面http路径,根据需要设置</span>
+                <span class="token punctuation">.</span><span class="token function">setGoodsDetailList</span><span class="token punctuation">(</span>goodsDetailList<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment" spellcheck="true">/** 一定要在创建AlipayTradeService之前调用Configs.init()设置默认参数
+         *  Configs会读取classpath下的zfbinfo.properties文件配置信息，如果找不到该文件则确认该文件是否在classpath目录
+         */</span>
+        Configs<span class="token punctuation">.</span><span class="token function">init</span><span class="token punctuation">(</span><span class="token string">"zfbinfo.properties"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token comment" spellcheck="true">/** 使用Configs提供的默认参数
+         *  AlipayTradeService可以使用单例或者为静态成员对象，不需要反复new
+         */</span>
+        AlipayTradeService tradeService <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">AlipayTradeServiceImpl<span class="token punctuation">.</span>ClientBuilder</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">build</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        AlipayF2FPrecreateResult result <span class="token operator">=</span> tradeService<span class="token punctuation">.</span><span class="token function">tradePrecreate</span><span class="token punctuation">(</span>builder<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>接着就是出参，二维码的生成，并展示给用户支付。图片展示通过上传到图片服务器的方式。所以前提得已经有一个ftp服务器和连接服务器的ftp工具类。</p>
+<pre><code>switch (result.getTradeStatus()) {
+            case SUCCESS:
+                log.info(&quot;支付宝预下单成功: )&quot;);
+
+                AlipayTradePrecreateResponse response = result.getResponse();
+                dumpResponse(response);
+
+//                关键部分，把生成二维码上传到图片服务器
+                File folder = new File(path);
+                if (!folder.exists()) {
+
+                    folder.setWritable(true);
+                    folder.mkdirs();
+                }
+
+                // 需要修改为运行机器上的路径
+                //替换s占位符
+                String QRPath = String.format(path + &quot;/qr-%s.png&quot;,
+                        response.getOutTradeNo());
+                String qrFileName = String.format(&quot;qr-%s.png&quot;, response.getOutTradeNo());
+                //支付宝调用guava生成二维码
+                ZxingUtils.getQRCodeImge(response.getQrCode(), 256, QRPath);
+
+                File targetFile = new File(path, qrFileName);
+                try {
+                    FTPUtil.uploadFile(Lists.newArrayList(targetFile));
+                } catch (IOException e) {
+                    log.error(&quot;上传二维码异常&quot;, e);
+                }
+                log.info(&quot;QRPath:&quot; + QRPath);
+                String qrUrl = PropertiesUtil.getProperty(&quot;ftp.server.http.prefix&quot;) + targetFile.getName();
+                resultMap.put(&quot;qrUrl&quot;, qrUrl);
+
+                return ServerRespond.createBySuccess(resultMap);
+
+            case FAILED:
+                log.error(&quot;支付宝预下单失败!!!&quot;);
+                return ServerRespond.createByErrorMessage(&quot;支付宝预下单失败&quot;);
+
+            case UNKNOWN:
+                log.error(&quot;系统异常，预下单状态未知!!!&quot;);
+                return ServerRespond.createByErrorMessage(&quot;系统异常，预下单状态未知!!!&quot;);
+            default:
+                log.error(&quot;不支持的交易状态，交易返回异常!!!&quot;);
+                return ServerRespond.createByErrorMessage(&quot;不支持的交易状态，交易返回异常!!!&quot;);
+        }
+
+</code></pre><h5 id="3、支付宝回调接口"><a href="#3、支付宝回调接口" class="headerlink" title="3、支付宝回调接口"></a>3、支付宝回调接口</h5><p>这个授权支付宝调用的接口，所以不能是本地ip，必须得有一个外网ip，最直接的方式是服务器上操作，但显然现在是没办法这样做的，于是采用了内网穿透的办法，内网穿透工具我采用ngrok，缺点是不能绑定固定域名。<br><img src="https://upload-images.jianshu.io/upload_images/5391552-0c92f18b54cfd4da.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"><br>授权回调接口：</p>
+<pre><code>public ServerRespond aliCallback(Map&lt;String, String&gt; params) {
+    //处理回调数据
+        Long orderNo = Long.parseLong(params.get(&quot;out_trade_no&quot;));
+        String tradeNo = params.get(&quot;trade_no&quot;);
+        String tradeStatus = params.get(&quot;trade_status&quot;);
+        Order order = orderMapper.selectByOrderNo(orderNo);
+        if (order == null) {
+            return ServerRespond.createByErrorMessage(&quot;寸金商场订单，回调忽略&quot;);
+        }
+        if (order.getStatus() &gt;= Const.OrderStatus.PAID.getCode()) {
+            return ServerRespond.createBySuccess(&quot;支付宝重复调用&quot;);
+        }
+        if (Const.alipayCallback.TRADE_STATUS_TRADE_SUCCESS.equals(tradeStatus)) {
+            order.setPaymentTime(DateTimeUtil.strToDate(params.get(&quot;gmt_payment&quot;)));
+            order.setStatus(Const.OrderStatus.PAID.getCode());
+            orderMapper.updateByPrimaryKeySelective(order);
+        }
+        PayInfo payInfo = new PayInfo();
+        payInfo.setUserId(order.getUserId());
+        payInfo.setOrderNo(order.getOrderNo());
+        payInfo.setPayPlatform(Const.PayPlatFormEnum.ALIPAY.getCode());
+        payInfo.setPlatformNumber(tradeNo);
+        payInfo.setPlatformStatus(tradeStatus);
+        payInfoMapper.insert(payInfo);
+        return ServerRespond.createBySuccess();
+    }
+</code></pre><p>关于回调接口可以看看<a href="https://docs.open.alipay.com/194/103296/" target="_blank" rel="noopener">文档</a>。<br><img src="https://upload-images.jianshu.io/upload_images/5391552-490fc6f28796f896.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<blockquote>
+<p>第一步： 在通知返回参数列表中，除去sign、sign_type两个参数外，凡是通知返回回来的参数皆是待验签的参数。</p>
+</blockquote>
+<p>这一步很重要，不然没办法验签，看源码,便可知sdk已经做了，接着组装StringBuffer，因为StringBuffer是线程安全的，可以以应付高并发操作。<br><img src="https://upload-images.jianshu.io/upload_images/5391552-f9f4374aee4d14ca.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<blockquote>
+<p>第三步： 将签名参数（sign）使用base64解码为字节码串。</p>
+</blockquote>
+<p>这一步sdk也做了。<br><img src="https://upload-images.jianshu.io/upload_images/5391552-7472020758f42f63.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<blockquote>
+<p>第四步： 使用RSA的验签方法，通过签名字符串、签名参数（经过base64解码）及支付宝公钥验证签名。</p>
+</blockquote>
+<p>然而需要注意的是上面这个方法实际上是不ok的，因为它的算法请求类型跟配置中的不一致。我们的请求算法类型是RSA2不是SHA1WithRSA。<br><img src="https://upload-images.jianshu.io/upload_images/5391552-ce542db39130435f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"><br>然而还有一个函数重载允许多了一个可以选择加密类型的参数。<br><img src="https://upload-images.jianshu.io/upload_images/5391552-b13f9a1fdac2d02d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"><br>点击rsaCheck，当signType的值equal不同的值调用不同的方法，很明显第二个就是我们要的。<br><img src="https://upload-images.jianshu.io/upload_images/5391552-6edfbdad2d20b7b2.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"><br>于是在控制器中就得这样写：<br><img src="https://upload-images.jianshu.io/upload_images/5391552-f6bbc88990dfc345.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<h4 id="五、对接测试"><a href="#五、对接测试" class="headerlink" title="五、对接测试"></a>五、对接测试</h4><h5 id="完成接口编写后就是接口测试"><a href="#完成接口编写后就是接口测试" class="headerlink" title="完成接口编写后就是接口测试"></a>完成接口编写后就是接口测试</h5><p>从数据库中提一个未付款的订单号做测试<br><img src="https://upload-images.jianshu.io/upload_images/5391552-676427e31ea18876.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"><br>成功的话会返回一个付款二维码<br><img src="https://upload-images.jianshu.io/upload_images/5391552-be179c896675a039.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"><br>打开该二维码：<br><img src="https://upload-images.jianshu.io/upload_images/5391552-474bfdad6b750976.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"><br>如图则已经对接成功：<br><img src="https://upload-images.jianshu.io/upload_images/5391552-10268d51e4ce5950.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"><br>以上就是支付宝集成的主要过程，代码只是贴了一部分<a href="https://github.com/Qroxyquan/mmall" target="_blank" rel="noopener">具体可以看这里</a>。</p>
+<h4 id="六、总结"><a href="#六、总结" class="headerlink" title="六、总结"></a>六、总结</h4><p>*<em>虽然官方的说明已经够详细了，但是真正入手去做还是有很多坑，此次对接过程中学习很多，其中尤其要注意的是因为官方的关系，sdk必须放在lib下，为了打包时能够同其他依赖包一起打包，还需配置好对sdk的打包插件，其他支付宝需要的依赖包如果用maven引入的话尽量保持版本一致或者一起跟支付宝sdk一同从Demo中复制过来放在lib包下</em>。*</p>
+
+        </div>
+        
+        
+        
+    </div>
+</div>
+
+
+
+<div class="card">
+    <div class="card-content">
+        <h3 class="menu-label has-text-centered">喜欢这篇文章？打赏一下作者吧</h3>
+        <div class="buttons is-centered">
+            
+                
+<a class="button is-info donate">
+    <span class="icon is-small">
+        <i class="fab fa-alipay"></i>
+    </span>
+    <span>支付宝</span>
+    <div class="qrcode"><img src="/images/alipay.png" alt="支付宝"></div>
+</a>
+
+                
+                
+<a class="button is-success donate">
+    <span class="icon is-small">
+        <i class="fab fa-weixin"></i>
+    </span>
+    <span>微信</span>
+    <div class="qrcode"><img src="/images/weixinpay.png" alt="微信"></div>
+</a>
+
+                
+        </div>
+    </div>
+</div>
+
+
+
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
+        
+        <div class="level-start">
+            <a class="level level-item has-link-grey  article-nav-prev" href="/2018/11/03/关于JAVA对象的序列化与反序列化的学习与理解/">
+                <i class="level-item fas fa-chevron-left"></i>
+                <span class="level-item">关于JAVA对象的序列化与反序列化的学习与理解</span>
+            </a>
+        </div>
+        
+        
+        <div class="level-end">
+            <a class="level level-item has-link-grey  article-nav-next" href="/2018/09/14/SSM强化学习：从零到部署/">
+                <span class="level-item">SSM强化学习：从零到部署</span>
+                <i class="level-item fas fa-chevron-right"></i>
+            </a>
+        </div>
+        
+    </div>
+</div>
+
+
+
+<div class="card">
+    <div class="card-content">
+        <h3 class="title is-5 has-text-weight-normal">评论</h3>
+        <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+<div class="gitalk">
+    <div id="gitalk-container"></div>
+    <script type="text/javascript">
+        const gitalk = new Gitalk({
+            clientID: 'b618d56d99aaf3f9b918',
+            clientSecret: 'c319f68f1df58500fedf1ab76237837d669c2da2',
+            repo: 'blogComments',
+            owner: 'Qroxyquan',
+            admin: ['Qroxyquan'],
+            id: "http://qroxy.cn/2018/10/17/对接支付宝支付接口开发笔记/index.html".substr(19,50),      // Ensure uniqueness and length less than 50
+            distractionFreeMode: false  // Facebook-like distraction free mode
+        })
+
+        gitalk.render('gitalk-container')
+    </script>
+</div>
+    </div>
+</div>
+</div>
+                
+
+
+
+
+<div class="column is-4-tablet is-4-desktop is-3-widescreen  has-order-1 column-left ">
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <nav class="level">
+            <div class="level-item has-text-centered" style="flex-shrink: 1">
+                <div>
+                    
+                        <figure class="image is-128x128 has-mb-6">
+                            <img class="is-rounded" src="/images/avatar.png" alt="Qroxy">
+                        </figure>
+                    
+                    
+                    <p class="is-size-4 is-block">
+                        Qroxy
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-block">
+                        Java Developer
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-flex is-flex-center has-text-grey">
+                        <i class="fas fa-map-marker-alt has-mr-7"></i>
+                        <span>ShenZhen</span>
+                    </p>
+                    
+                </div>
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        文章
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        14
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        分类
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        5
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        标签
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        9
+                    </p>
+                </div>
+            </div>
+        </nav>
+        <div class="level">
+            <a class="level-item button is-link is-rounded" href="https://github.com/Qroxyquan" target="_blank">
+                关注我</a>
+        </div>
+        
+        
+        <div class="level is-mobile">
+            
+            <a class="level-item button is-white is-marginless" target="_blank"
+                title="Github" href="https://github.com/Qroxyquan">
+                
+                <i class="fab fa-github"></i>
+                
+            </a>
+            
+        </div>
+        
+    </div>
+</div>
+    
+        
+    
+    
+        <div class="column-right-shadow is-hidden-widescreen ">
+        
+            
+<div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                分类
+            </h3>
+            <ul class="menu-list">
+            <li>
+        <a class="level is-marginless" href="/categories/java/">
+            <span class="level-start">
+                <span class="level-item">java</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">2</span>
+            </span>
+        </a><ul><li>
+        <a class="level is-marginless" href="/categories/java/Spring/">
+            <span class="level-start">
+                <span class="level-item">Spring</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li></ul></li><li>
+        <a class="level is-marginless" href="/categories/markdown/">
+            <span class="level-start">
+                <span class="level-item">markdown</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a><ul><li>
+        <a class="level is-marginless" href="/categories/markdown/java/">
+            <span class="level-start">
+                <span class="level-item">java</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li></ul></li><li>
+        <a class="level is-marginless" href="/categories/运维/">
+            <span class="level-start">
+                <span class="level-item">运维</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+        
+            
+<div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            标签云
+        </h3>
+        <a href="/tags/frp/" style="font-size: 10px;">frp</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/markdown/" style="font-size: 10px;">markdown</a> <a href="/tags/md/" style="font-size: 10px;">md</a> <a href="/tags/springboot/" style="font-size: 20px;">springboot</a> <a href="/tags/远程/" style="font-size: 10px;">远程</a> <a href="/tags/阿里云/" style="font-size: 10px;">阿里云</a> <a href="/tags/阿里云OSS/" style="font-size: 10px;">阿里云OSS</a> <a href="/tags/面试/" style="font-size: 10px;">面试</a>
+    </div>
+</div>
+
+        
+            
+<div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            最新文章
+        </h3>
+        
+        <article class="media">
+            
+            <a href="/2020/01/21/frps/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="frp内网穿透实现远程">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-01-21T01:23:06.000Z">2020-01-21</time></div>
+                    <a href="/2020/01/21/frps/" class="title has-link-black-ter is-size-6 has-text-weight-normal">frp内网穿透实现远程</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/运维/">运维</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2019/08/26/md-picpool/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="md技巧-配置自己的图床（两种方式）">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-08-26T05:34:45.000Z">2019-08-26</time></div>
+                    <a href="/2019/08/26/md-picpool/" class="title has-link-black-ter is-size-6 has-text-weight-normal">md技巧-配置自己的图床（两种方式）</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/markdown/">markdown</a> / <a class="has-link-grey -link" href="/categories/markdown/java/">java</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2019/08/20/how-to-use-springboot/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="如何使用Springboot">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-08-20T01:55:47.000Z">2019-08-20</time></div>
+                    <a href="/2019/08/20/how-to-use-springboot/" class="title has-link-black-ter is-size-6 has-text-weight-normal">如何使用Springboot</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/java/">java</a> / <a class="has-link-grey -link" href="/categories/java/Spring/">Spring</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2019/06/03/Java面试必备/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="Java面试必备">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-06-03T02:32:20.000Z">2019-06-03</time></div>
+                    <a href="/2019/06/03/Java面试必备/" class="title has-link-black-ter is-size-6 has-text-weight-normal">Java面试必备</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/java/">java</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2018/11/03/关于JAVA对象的序列化与反序列化的学习与理解/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="关于JAVA对象的序列化与反序列化的学习与理解">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2018-11-03T05:30:33.000Z">2018-11-03</time></div>
+                    <a href="/2018/11/03/关于JAVA对象的序列化与反序列化的学习与理解/" class="title has-link-black-ter is-size-6 has-text-weight-normal">关于JAVA对象的序列化与反序列化的学习与理解</a>
+                    <p class="is-size-7 is-uppercase">
+                        
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+    </div>
+</div>
+
+        
+            <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            归档
+        </h3>
+        <ul class="menu-list">
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2020/01/">
+                <span class="level-start">
+                    <span class="level-item">一月 2020</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/08/">
+                <span class="level-start">
+                    <span class="level-item">八月 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/06/">
+                <span class="level-start">
+                    <span class="level-item">六月 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/11/">
+                <span class="level-start">
+                    <span class="level-item">十一月 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/10/">
+                <span class="level-start">
+                    <span class="level-item">十月 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/09/">
+                <span class="level-start">
+                    <span class="level-item">九月 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/08/">
+                <span class="level-start">
+                    <span class="level-item">八月 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/07/">
+                <span class="level-start">
+                    <span class="level-item">七月 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">4</span>
+                </span>
+            </a>
+        </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+        
+        </div>
+    
+</div>
+
+                
+
+
+
+
+<div class="column is-4-tablet is-4-desktop is-3-widescreen is-hidden-touch is-hidden-desktop-only has-order-3 column-right ">
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                分类
+            </h3>
+            <ul class="menu-list">
+            <li>
+        <a class="level is-marginless" href="/categories/java/">
+            <span class="level-start">
+                <span class="level-item">java</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">2</span>
+            </span>
+        </a><ul><li>
+        <a class="level is-marginless" href="/categories/java/Spring/">
+            <span class="level-start">
+                <span class="level-item">Spring</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li></ul></li><li>
+        <a class="level is-marginless" href="/categories/markdown/">
+            <span class="level-start">
+                <span class="level-item">markdown</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a><ul><li>
+        <a class="level is-marginless" href="/categories/markdown/java/">
+            <span class="level-start">
+                <span class="level-item">java</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li></ul></li><li>
+        <a class="level is-marginless" href="/categories/运维/">
+            <span class="level-start">
+                <span class="level-item">运维</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            标签云
+        </h3>
+        <a href="/tags/frp/" style="font-size: 10px;">frp</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/markdown/" style="font-size: 10px;">markdown</a> <a href="/tags/md/" style="font-size: 10px;">md</a> <a href="/tags/springboot/" style="font-size: 20px;">springboot</a> <a href="/tags/远程/" style="font-size: 10px;">远程</a> <a href="/tags/阿里云/" style="font-size: 10px;">阿里云</a> <a href="/tags/阿里云OSS/" style="font-size: 10px;">阿里云OSS</a> <a href="/tags/面试/" style="font-size: 10px;">面试</a>
+    </div>
+</div>
+
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            最新文章
+        </h3>
+        
+        <article class="media">
+            
+            <a href="/2020/01/21/frps/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="frp内网穿透实现远程">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-01-21T01:23:06.000Z">2020-01-21</time></div>
+                    <a href="/2020/01/21/frps/" class="title has-link-black-ter is-size-6 has-text-weight-normal">frp内网穿透实现远程</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/运维/">运维</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2019/08/26/md-picpool/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="md技巧-配置自己的图床（两种方式）">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-08-26T05:34:45.000Z">2019-08-26</time></div>
+                    <a href="/2019/08/26/md-picpool/" class="title has-link-black-ter is-size-6 has-text-weight-normal">md技巧-配置自己的图床（两种方式）</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/markdown/">markdown</a> / <a class="has-link-grey -link" href="/categories/markdown/java/">java</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2019/08/20/how-to-use-springboot/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="如何使用Springboot">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-08-20T01:55:47.000Z">2019-08-20</time></div>
+                    <a href="/2019/08/20/how-to-use-springboot/" class="title has-link-black-ter is-size-6 has-text-weight-normal">如何使用Springboot</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/java/">java</a> / <a class="has-link-grey -link" href="/categories/java/Spring/">Spring</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2019/06/03/Java面试必备/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="Java面试必备">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-06-03T02:32:20.000Z">2019-06-03</time></div>
+                    <a href="/2019/06/03/Java面试必备/" class="title has-link-black-ter is-size-6 has-text-weight-normal">Java面试必备</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/java/">java</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2018/11/03/关于JAVA对象的序列化与反序列化的学习与理解/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="关于JAVA对象的序列化与反序列化的学习与理解">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2018-11-03T05:30:33.000Z">2018-11-03</time></div>
+                    <a href="/2018/11/03/关于JAVA对象的序列化与反序列化的学习与理解/" class="title has-link-black-ter is-size-6 has-text-weight-normal">关于JAVA对象的序列化与反序列化的学习与理解</a>
+                    <p class="is-size-7 is-uppercase">
+                        
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+    </div>
+</div>
+
+    
+        <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            归档
+        </h3>
+        <ul class="menu-list">
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2020/01/">
+                <span class="level-start">
+                    <span class="level-item">一月 2020</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/08/">
+                <span class="level-start">
+                    <span class="level-item">八月 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/06/">
+                <span class="level-start">
+                    <span class="level-item">六月 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/11/">
+                <span class="level-start">
+                    <span class="level-item">十一月 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/10/">
+                <span class="level-start">
+                    <span class="level-item">十月 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/09/">
+                <span class="level-start">
+                    <span class="level-item">九月 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/08/">
+                <span class="level-start">
+                    <span class="level-item">八月 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/07/">
+                <span class="level-start">
+                    <span class="level-item">七月 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">4</span>
+                </span>
+            </a>
+        </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+    
+    
+</div>
+
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+    <div class="container">
+        <div class="level">
+            <div class="level-start has-text-centered-mobile">
+                <a class="footer-logo is-block has-mb-6" href="/">
+                
+                    <img src="/images/avatar.png" alt="对接支付宝支付接口开发笔记" height="28">
+                
+                </a>
+                <p class="is-size-7">
+                &copy; 2020 ZhenQuan&nbsp;
+                Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a
+                        href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank">Icarus</a><br/>
+<h6>本博客所有文章，除特别申明外，均遵循 CC BY-NC-SA 4.0 协议，请务必知悉。
+</h6>
+<h6>粤 ICP备 17042306 号</h6>
+                
+                </p>
+            </div>
+            <div class="level-end">
+            
+                <div class="field has-addons is-flex-center-mobile has-mt-5-mobile is-flex-wrap is-flex-middle">
+                
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" title="Creative Commons" href="https://creativecommons.org/">
+                        
+                        <i class="fab fa-creative-commons"></i>
+                        
+                    </a>
+                </p>
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/">
+                        
+                        <i class="fab fa-creative-commons-by"></i>
+                        
+                    </a>
+                </p>
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                </p>
+                
+                </div>
+            
+            </div>
+        </div>
+    </div>
+
+</footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script>
+<script>moment.locale("zh-CN");</script>
+
+<script>
+var IcarusThemeSettings = {
+    article: {
+        highlight: {
+            clipboard: true,
+            fold: 'unfolded'
+        }
+    }
+};
+</script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script>
+
+
+
+    
+    
+    
+    <script src="/js/animation.js"></script>
+    
+
+    
+    
+    
+    <script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script>
+    <script src="/js/gallery.js" defer></script>
+    
+
+    
+    
+
+<div id="outdated">
+    <h6>Your browser is out-of-date!</h6>
+    <p>Update your browser to view this website correctly. <a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update
+            my browser now </a></p>
+    <p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">&times;</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        outdatedBrowser({
+            bgColor: '#f25648',
+            color: '#ffffff',
+            lowerThan: 'flex'
+        });
+    });
+</script>
+
+
+    
+    
+<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    MathJax.Hub.Config({
+        'HTML-CSS': {
+            matchFontHeight: false
+        },
+        SVG: {
+            matchFontHeight: false
+        },
+        CommonHTML: {
+            matchFontHeight: false
+        },
+        tex2jax: {
+            inlineMath: [
+                ['$','$'],
+                ['\\(','\\)']
+            ]
+        }
+    });
+});
+</script>
+
+    
+    
+
+<a id="back-to-top" title="回到顶端" href="javascript:;">
+    <i class="fas fa-chevron-up"></i>
+</a>
+<script src="/js/back-to-top.js" defer></script>
+
+
+    
+    
+
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+
+
+<script src="/js/main.js" defer></script>
+
+    
+    <div class="searchbox ins-search">
+    <div class="searchbox-container ins-search-container">
+        <div class="searchbox-input-wrapper">
+            <input type="text" class="searchbox-input ins-search-input" placeholder="想要查找什么..." />
+            <span class="searchbox-close ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="searchbox-result-wrapper ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: '文章',
+                PAGES: '页面',
+                CATEGORIES: '分类',
+                TAGS: '标签',
+                UNTITLED: '(无标题)',
+            },
+            CONTENT_URL: '/content.json',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script src="/js/insight.js" defer></script>
+<link rel="stylesheet" href="/css/search.css">
+<link rel="stylesheet" href="/css/insight.css">
+    
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"left","width":100,"height":200},"mobile":{"show":false},"log":false});</script></body>
+</html>

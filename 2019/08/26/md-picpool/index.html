@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<script src="/js/clicklove.js"></script>
+<html  lang="zh">
+<head>
+    <meta charset="utf-8" />
+
+<meta name="generator" content="Hexo 3.7.1" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+<title>md技巧-配置自己的图床（两种方式） - Qroxy</title>
+
+
+    <meta name="description" content="Markdown是一种轻量级标记语言，可以通过简单的标记使文本具有雅观的格式，让你更加专心与写作。如果说有点让人分心的缺点的话那就是图片上传到图床这个过程了，一般的处理是上传到某个平台，但是可能出现被平台限制出现图片不可用的尴尬。为了避免这种情况出现，我们可以自制图床。">
+<meta name="keywords" content="springboot,markdown,md,阿里云,阿里云OSS">
+<meta property="og:type" content="article">
+<meta property="og:title" content="md技巧-配置自己的图床（两种方式）">
+<meta property="og:url" content="http://qroxy.cn/2019/08/26/md-picpool/index.html">
+<meta property="og:site_name" content="Qroxy">
+<meta property="og:description" content="Markdown是一种轻量级标记语言，可以通过简单的标记使文本具有雅观的格式，让你更加专心与写作。如果说有点让人分心的缺点的话那就是图片上传到图床这个过程了，一般的处理是上传到某个平台，但是可能出现被平台限制出现图片不可用的尴尬。为了避免这种情况出现，我们可以自制图床。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://qroxy.cn/images/og_image.png">
+<meta property="og:updated_time" content="2020-06-11T03:58:12.496Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="md技巧-配置自己的图床（两种方式）">
+<meta name="twitter:description" content="Markdown是一种轻量级标记语言，可以通过简单的标记使文本具有雅观的格式，让你更加专心与写作。如果说有点让人分心的缺点的话那就是图片上传到图床这个过程了，一般的处理是上传到某个平台，但是可能出现被平台限制出现图片不可用的尴尬。为了避免这种情况出现，我们可以自制图床。">
+<meta name="twitter:image" content="http://qroxy.cn/images/og_image.png">
+
+
+
+
+
+
+
+<link rel="icon" href="/images/avatar.png">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/atom-one-light.css">
+
+
+    
+    
+    
+    <style>body>.footer,body>.navbar,body>.section{opacity:0}</style>
+    
+
+    
+    
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css">
+    
+
+    
+    
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css">
+
+
+    
+    
+    
+    
+
+<link rel="stylesheet" href="/css/back-to-top.css">
+
+
+    
+    
+
+    
+    
+    
+    
+
+    
+    
+<link rel="stylesheet" href="/css/progressbar.css">
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+
+    
+    
+    
+
+
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+<body class="is-3-column">
+    <nav class="navbar navbar-main">
+    <div class="container">
+        <div class="navbar-brand is-flex-center">
+            <a class="navbar-item navbar-logo" href="/">
+            
+                <img src="/images/avatar.png" alt="md技巧-配置自己的图床（两种方式）" height="28">
+            
+            </a>
+        </div>
+        <div class="navbar-menu">
+            
+            <div class="navbar-start">
+                
+                <a class="navbar-item"
+                href="/">首页</a>
+                
+                <a class="navbar-item"
+                href="/archives">归档</a>
+                
+                <a class="navbar-item"
+                href="/categories">分类</a>
+                
+                <a class="navbar-item"
+                href="/tags">标签</a>
+                
+                <a class="navbar-item"
+                href="/about">个人简历</a>
+                
+            </div>
+            
+            <div class="navbar-end">
+                
+                    
+                    
+                    <a class="navbar-item" target="_blank" title="Download on GitHub" href="https://github.com/Qroxyquan">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                    
+                
+                
+                <a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;">
+                    <i class="fas fa-list-ul"></i>
+                </a>
+                
+                
+                <a class="navbar-item search" title="搜索" href="javascript:;">
+                    <i class="fas fa-search"></i>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-tablet is-8-desktop is-6-widescreen has-order-2 column-main"><div class="card">
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+
+            <div class="level-left">
+                <time class="level-item has-text-grey" datetime="2019-08-26T05:34:45.000Z">2019-08-26</time>
+                
+                <div class="level-item">
+                <a class="has-link-grey -link" href="/categories/markdown/">markdown</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/markdown/java/">java</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    7 分钟 读完 (大约 988 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+                md技巧-配置自己的图床（两种方式）
+            
+        </h1>
+        <div class="content">
+            <p>Markdown是一种轻量级标记语言，可以通过简单的标记使文本具有雅观的格式，让你更加专心与写作。如果说有点让人分心的缺点的话那就是图片上传到图床这个过程了，一般的处理是上传到某个平台，但是可能出现被平台限制出现图片不可用的尴尬。为了避免这种情况出现，我们可以自制图床。<br><a id="more"></a></p>
+<h3 id="PicGo"><a href="#PicGo" class="headerlink" title="PicGo"></a>PicGo</h3><p><a href="https://picgo.github.io/PicGo-Doc/zh/guide/config.html" target="_blank" rel="noopener">PicGo</a>是一款简单易用的图床上传工具，配合对应的图床，能够提高写文体验。使用electron开发，意味着全平台：</p>
+<ul>
+<li><a href="https://github.com/Molunerfinn/PicGo/releases/download/v2.1.2/picgo-setup-2.1.2.exe" target="_blank" rel="noopener">win</a> </li>
+<li><a href="https://github.com/Molunerfinn/PicGo/releases/download/v2.1.2/PicGo-2.1.2.dmg" target="_blank" rel="noopener">mac</a></li>
+<li><a href="https://github.com/Molunerfinn/PicGo/releases/download/v2.1.2/picgo-2.1.2-x86_64.AppImage" target="_blank" rel="noopener">linux</a>  </li>
+</ul>
+<h3 id="一、阿里对象存储OSS-PicGo"><a href="#一、阿里对象存储OSS-PicGo" class="headerlink" title="一、阿里对象存储OSS +PicGo"></a>一、阿里对象存储OSS +PicGo</h3><p>进入<a href="https://common-buy.aliyun.com/?spm=5176.7933691.1309819..195e2a66sc8Zda&amp;commodityCode=ossbag&amp;request=%7B%22region%22%3A%22china-common%22%7D#/buy" target="_blank" rel="noopener">这里</a>购买套餐。</p>
+<h5 id="然后新建Bucket"><a href="#然后新建Bucket" class="headerlink" title="然后新建Bucket"></a>然后新建Bucket</h5><p><img src="http://img.qroxy.cn/img/20190826131012.png" alt=""><br>创建成功后，获取到accessKeyId和accessKeySecret</p>
+<h5 id="使用PicGo配置OSS："><a href="#使用PicGo配置OSS：" class="headerlink" title="使用PicGo配置OSS："></a>使用PicGo配置OSS：</h5><p><img src="http://img.qroxy.cn/img/20190826131335.png" alt=""></p>
+<h4 id="java自定义开发实例："><a href="#java自定义开发实例：" class="headerlink" title="java自定义开发实例："></a>java自定义开发实例：</h4><h5 id="引入SDk"><a href="#引入SDk" class="headerlink" title="引入SDk"></a>引入SDk</h5><pre class=" language-xml"><code class="language-xml">   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">></span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">></span></span>com.baomidou<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">></span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">></span></span>mybatis-plus-boot-starter<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">></span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>version</span><span class="token punctuation">></span></span>${mybatis-plus-boot-starter.version}<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>version</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">></span></span>
+</code></pre>
+<h5 id="OSS工具类"><a href="#OSS工具类" class="headerlink" title="OSS工具类"></a>OSS工具类</h5><pre class=" language-java"><code class="language-java"><span class="token keyword">package</span> com<span class="token punctuation">.</span>lingzhenquan<span class="token punctuation">.</span>demo<span class="token punctuation">.</span>Qroxy<span class="token punctuation">.</span>utils<span class="token punctuation">;</span>
+
+<span class="token keyword">import</span> com<span class="token punctuation">.</span>aliyun<span class="token punctuation">.</span>oss<span class="token punctuation">.</span>OSSClient<span class="token punctuation">;</span>
+<span class="token keyword">import</span> com<span class="token punctuation">.</span>aliyun<span class="token punctuation">.</span>oss<span class="token punctuation">.</span>model<span class="token punctuation">.</span>OSSObject<span class="token punctuation">;</span>
+<span class="token keyword">import</span> com<span class="token punctuation">.</span>aliyun<span class="token punctuation">.</span>oss<span class="token punctuation">.</span>model<span class="token punctuation">.</span>ObjectMetadata<span class="token punctuation">;</span>
+<span class="token keyword">import</span> com<span class="token punctuation">.</span>aliyun<span class="token punctuation">.</span>oss<span class="token punctuation">.</span>model<span class="token punctuation">.</span>PutObjectResult<span class="token punctuation">;</span>
+<span class="token keyword">import</span> lombok<span class="token punctuation">.</span>extern<span class="token punctuation">.</span>slf4j<span class="token punctuation">.</span>Slf4j<span class="token punctuation">;</span>
+<span class="token keyword">import</span> org<span class="token punctuation">.</span>springframework<span class="token punctuation">.</span>web<span class="token punctuation">.</span>multipart<span class="token punctuation">.</span>MultipartFile<span class="token punctuation">;</span>
+
+<span class="token keyword">import</span> java<span class="token punctuation">.</span>io<span class="token punctuation">.</span>ByteArrayInputStream<span class="token punctuation">;</span>
+<span class="token keyword">import</span> java<span class="token punctuation">.</span>io<span class="token punctuation">.</span>File<span class="token punctuation">;</span>
+<span class="token keyword">import</span> java<span class="token punctuation">.</span>io<span class="token punctuation">.</span>IOException<span class="token punctuation">;</span>
+
+<span class="token comment" spellcheck="true">/**
+ * @desc：
+ * @author: lingzhenquan
+ * @时间: 2019-08-22-13:10
+ */</span>
+<span class="token annotation punctuation">@Slf4j</span>
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">AliyunOSSClientUtil</span> <span class="token punctuation">{</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">final</span> String ENDPOINT <span class="token operator">=</span> <span class="token string">"http://oss-cn-shenzhen.aliyuncs.com/"</span><span class="token punctuation">;</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">final</span> String ACCESS_KEY_ID <span class="token operator">=</span> <span class="token string">""</span><span class="token punctuation">;</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">final</span> String ACCESS_KEY_SECRET <span class="token operator">=</span> <span class="token string">""</span><span class="token punctuation">;</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">final</span> String FILE_PATH<span class="token operator">=</span><span class="token string">"img/"</span><span class="token punctuation">;</span>
+    <span class="token comment" spellcheck="true">/**
+     * 获取阿里云OSS客户端对象
+     * @return ossClient
+     */</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> OSSClient <span class="token function">getOSSClient</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+        <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">OSSClient</span><span class="token punctuation">(</span>ENDPOINT<span class="token punctuation">,</span>ACCESS_KEY_ID<span class="token punctuation">,</span> ACCESS_KEY_SECRET<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token comment" spellcheck="true">/**
+    *@desc:上传图片到OSS
+    *
+    *@author:lingzhenquan
+    *
+    *@date:2019-08-22 13:18
+    *
+    *@param:
+    *
+    *@type:
+    *
+    */</span>
+    <span class="token keyword">public</span>  <span class="token keyword">static</span> String <span class="token function">uploadObject2OSS</span><span class="token punctuation">(</span> MultipartFile file<span class="token punctuation">,</span> String bucketName<span class="token punctuation">,</span> String folder<span class="token punctuation">)</span><span class="token punctuation">{</span>
+        String fileName<span class="token operator">=</span>file<span class="token punctuation">.</span><span class="token function">getOriginalFilename</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        String ret<span class="token punctuation">;</span>
+        ObjectMetadata metadata<span class="token operator">=</span><span class="token keyword">new</span> <span class="token class-name">ObjectMetadata</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        OSSClient ossClient<span class="token operator">=</span>null<span class="token punctuation">;</span>
+        <span class="token keyword">try</span> <span class="token punctuation">{</span>
+            metadata<span class="token punctuation">.</span><span class="token function">setContentLength</span><span class="token punctuation">(</span>file<span class="token punctuation">.</span><span class="token function">getInputStream</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">available</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            metadata<span class="token punctuation">.</span><span class="token function">setCacheControl</span><span class="token punctuation">(</span><span class="token string">"no-cache"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            metadata<span class="token punctuation">.</span><span class="token function">setContentType</span><span class="token punctuation">(</span><span class="token function">getContentType</span><span class="token punctuation">(</span>fileName<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            metadata<span class="token punctuation">.</span><span class="token function">setHeader</span><span class="token punctuation">(</span><span class="token string">"Pragma"</span><span class="token punctuation">,</span> <span class="token string">"no-cache"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            metadata<span class="token punctuation">.</span><span class="token function">setContentEncoding</span><span class="token punctuation">(</span><span class="token string">"utf-8"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            metadata<span class="token punctuation">.</span><span class="token function">setContentDisposition</span><span class="token punctuation">(</span><span class="token string">"filename/filesize="</span> <span class="token operator">+</span> fileName <span class="token operator">+</span> <span class="token string">"/"</span> <span class="token operator">+</span> file<span class="token punctuation">.</span><span class="token function">getSize</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token string">"Byte."</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+             ossClient<span class="token operator">=</span>AliyunOSSClientUtil<span class="token punctuation">.</span><span class="token function">getOSSClient</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+           PutObjectResult putObjectResult<span class="token operator">=</span> ossClient<span class="token punctuation">.</span><span class="token function">putObject</span><span class="token punctuation">(</span>bucketName<span class="token punctuation">,</span>folder<span class="token operator">+</span>fileName<span class="token punctuation">,</span>file<span class="token punctuation">.</span><span class="token function">getInputStream</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>metadata<span class="token punctuation">)</span><span class="token punctuation">;</span>
+           ret<span class="token operator">=</span> putObjectResult<span class="token punctuation">.</span><span class="token function">getETag</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">IOException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+          log<span class="token punctuation">.</span><span class="token function">error</span><span class="token punctuation">(</span><span class="token string">"上传失败："</span><span class="token operator">+</span>e<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            ossClient<span class="token punctuation">.</span><span class="token function">shutdown</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">return</span> <span class="token string">"上传失败"</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        ossClient<span class="token punctuation">.</span><span class="token function">shutdown</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> ret<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+  <span class="token comment" spellcheck="true">/**
+  *@desc: 生成文件夹
+  *
+  *@author:lingzhenquan
+  *
+  *@date:2019-08-22 14:12
+  *
+  *@param:[folder, bucketName]
+  *
+  *@type:java.lang.String
+  *
+  */</span>
+    <span class="token keyword">public</span>  <span class="token keyword">static</span> String <span class="token function">createFileFolder</span><span class="token punctuation">(</span>String folder<span class="token punctuation">,</span>String bucketName<span class="token punctuation">)</span><span class="token punctuation">{</span>
+        <span class="token keyword">final</span> String createFolder<span class="token operator">=</span>folder<span class="token punctuation">;</span>
+        OSSClient ossClient<span class="token operator">=</span>AliyunOSSClientUtil<span class="token punctuation">.</span><span class="token function">getOSSClient</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>ossClient<span class="token punctuation">.</span><span class="token function">doesObjectExist</span><span class="token punctuation">(</span>bucketName<span class="token punctuation">,</span>createFolder<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+
+            ossClient<span class="token punctuation">.</span><span class="token function">putObject</span><span class="token punctuation">(</span>bucketName<span class="token punctuation">,</span>folder<span class="token punctuation">,</span><span class="token keyword">new</span> <span class="token class-name">ByteArrayInputStream</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">byte</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            log<span class="token punctuation">.</span><span class="token function">info</span><span class="token punctuation">(</span><span class="token string">"创建文件夹成功"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            OSSObject ossObject<span class="token operator">=</span>ossClient<span class="token punctuation">.</span><span class="token function">getObject</span><span class="token punctuation">(</span>bucketName<span class="token punctuation">,</span>createFolder<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">return</span> ossObject<span class="token punctuation">.</span><span class="token function">getKey</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">return</span> <span class="token string">"文件已存在！"</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token comment" spellcheck="true">/**
+     * 通过文件名判断并获取OSS服务文件上传时文件的contentType
+     * @param fileName 文件名
+     * @return 文件的contentType
+     */</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span>  String <span class="token function">getContentType</span><span class="token punctuation">(</span>String fileName<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment" spellcheck="true">//文件的后缀名</span>
+        String fileExtension <span class="token operator">=</span> fileName<span class="token punctuation">.</span><span class="token function">substring</span><span class="token punctuation">(</span>fileName<span class="token punctuation">.</span><span class="token function">lastIndexOf</span><span class="token punctuation">(</span><span class="token string">"."</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token string">".bmp"</span><span class="token punctuation">.</span><span class="token function">equalsIgnoreCase</span><span class="token punctuation">(</span>fileExtension<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">return</span> <span class="token string">"image/bmp"</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token string">".gif"</span><span class="token punctuation">.</span><span class="token function">equalsIgnoreCase</span><span class="token punctuation">(</span>fileExtension<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">return</span> <span class="token string">"image/gif"</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token string">".jpeg"</span><span class="token punctuation">.</span><span class="token function">equalsIgnoreCase</span><span class="token punctuation">(</span>fileExtension<span class="token punctuation">)</span> <span class="token operator">||</span> <span class="token string">".jpg"</span><span class="token punctuation">.</span><span class="token function">equalsIgnoreCase</span><span class="token punctuation">(</span>fileExtension<span class="token punctuation">)</span> <span class="token operator">||</span> <span class="token string">".png"</span><span class="token punctuation">.</span><span class="token function">equalsIgnoreCase</span><span class="token punctuation">(</span>fileExtension<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">return</span> <span class="token string">"image/jpeg"</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token string">".html"</span><span class="token punctuation">.</span><span class="token function">equalsIgnoreCase</span><span class="token punctuation">(</span>fileExtension<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">return</span> <span class="token string">"text/html"</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token string">".txt"</span><span class="token punctuation">.</span><span class="token function">equalsIgnoreCase</span><span class="token punctuation">(</span>fileExtension<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">return</span> <span class="token string">"text/plain"</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token string">".vsd"</span><span class="token punctuation">.</span><span class="token function">equalsIgnoreCase</span><span class="token punctuation">(</span>fileExtension<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">return</span> <span class="token string">"application/vnd.visio"</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token string">".ppt"</span><span class="token punctuation">.</span><span class="token function">equalsIgnoreCase</span><span class="token punctuation">(</span>fileExtension<span class="token punctuation">)</span> <span class="token operator">||</span> <span class="token string">"pptx"</span><span class="token punctuation">.</span><span class="token function">equalsIgnoreCase</span><span class="token punctuation">(</span>fileExtension<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">return</span> <span class="token string">"application/vnd.ms-powerpoint"</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token string">".doc"</span><span class="token punctuation">.</span><span class="token function">equalsIgnoreCase</span><span class="token punctuation">(</span>fileExtension<span class="token punctuation">)</span> <span class="token operator">||</span> <span class="token string">"docx"</span><span class="token punctuation">.</span><span class="token function">equalsIgnoreCase</span><span class="token punctuation">(</span>fileExtension<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">return</span> <span class="token string">"application/msword"</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token string">".xml"</span><span class="token punctuation">.</span><span class="token function">equalsIgnoreCase</span><span class="token punctuation">(</span>fileExtension<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">return</span> <span class="token string">"text/xml"</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token comment" spellcheck="true">//默认返回类型</span>
+        <span class="token keyword">return</span> <span class="token string">"image/jpeg"</span><span class="token punctuation">;</span>
+
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+</code></pre>
+<h3 id="二、github-PicGo"><a href="#二、github-PicGo" class="headerlink" title="二、github +PicGo"></a>二、github +PicGo</h3><p>也可以使用github做图床。   </p>
+<h5 id="新建一个Repository"><a href="#新建一个Repository" class="headerlink" title="新建一个Repository"></a>新建一个Repository</h5><p>用于存需要上传的图片。这个仓库最好是public。</p>
+<h5 id="生产授权token"><a href="#生产授权token" class="headerlink" title="生产授权token"></a>生产授权token</h5><p>在Github的Developer setting界面生一个token。记得保存，因为它只会显示一次。<br><img src="http://img.qroxy.cn/img/20190826132552.png" alt=""></p>
+<h5 id="配置PicGo"><a href="#配置PicGo" class="headerlink" title="配置PicGo"></a>配置PicGo</h5><p><img src="http://img.qroxy.cn/img/20190826132626.png" alt=""></p>
+<h3 id="三、如何使用PicGo"><a href="#三、如何使用PicGo" class="headerlink" title="三、如何使用PicGo"></a>三、如何使用PicGo</h3><p>有两种方式：</p>
+<ul>
+<li><p>通过屏幕截图<br>截取图片之后，图片会出现在PicGo的待上传列表里面。但是手动点击一下触发上传。成功后链接在粘贴板。</p>
+</li>
+<li><p>通过面板上传图片<br>我们需要将需要使用的图片拖到PicGo的客户端/或点击上传/或点击粘贴板上传手动上传，上传成功之后，会自动复制成markdown文本，可以直接粘贴使用。<br><img src="http://img.qroxy.cn/img/20190826132906.png" alt=""></p>
+</li>
+</ul>
+
+        </div>
+        
+        <div class="level is-size-7 is-uppercase">
+            <div class="level-start">
+                <div class="level-item">
+                    <span class="is-size-6 has-text-grey has-mr-7">#</span>
+                    <a class="has-link-grey -link" href="/tags/markdown/">markdown</a>, <a class="has-link-grey -link" href="/tags/md/">md</a>, <a class="has-link-grey -link" href="/tags/springboot/">springboot</a>, <a class="has-link-grey -link" href="/tags/阿里云/">阿里云</a>, <a class="has-link-grey -link" href="/tags/阿里云OSS/">阿里云OSS</a>
+                </div>
+            </div>
+        </div>
+        
+        
+        
+    </div>
+</div>
+
+
+
+<div class="card">
+    <div class="card-content">
+        <h3 class="menu-label has-text-centered">喜欢这篇文章？打赏一下作者吧</h3>
+        <div class="buttons is-centered">
+            
+                
+<a class="button is-info donate">
+    <span class="icon is-small">
+        <i class="fab fa-alipay"></i>
+    </span>
+    <span>支付宝</span>
+    <div class="qrcode"><img src="/images/alipay.png" alt="支付宝"></div>
+</a>
+
+                
+                
+<a class="button is-success donate">
+    <span class="icon is-small">
+        <i class="fab fa-weixin"></i>
+    </span>
+    <span>微信</span>
+    <div class="qrcode"><img src="/images/weixinpay.png" alt="微信"></div>
+</a>
+
+                
+        </div>
+    </div>
+</div>
+
+
+
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
+        
+        <div class="level-start">
+            <a class="level level-item has-link-grey  article-nav-prev" href="/2020/01/21/frps/">
+                <i class="level-item fas fa-chevron-left"></i>
+                <span class="level-item">frp内网穿透实现远程</span>
+            </a>
+        </div>
+        
+        
+        <div class="level-end">
+            <a class="level level-item has-link-grey  article-nav-next" href="/2019/08/20/how-to-use-springboot/">
+                <span class="level-item">如何使用Springboot</span>
+                <i class="level-item fas fa-chevron-right"></i>
+            </a>
+        </div>
+        
+    </div>
+</div>
+
+
+
+<div class="card">
+    <div class="card-content">
+        <h3 class="title is-5 has-text-weight-normal">评论</h3>
+        <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+<div class="gitalk">
+    <div id="gitalk-container"></div>
+    <script type="text/javascript">
+        const gitalk = new Gitalk({
+            clientID: 'b618d56d99aaf3f9b918',
+            clientSecret: 'c319f68f1df58500fedf1ab76237837d669c2da2',
+            repo: 'blogComments',
+            owner: 'Qroxyquan',
+            admin: ['Qroxyquan'],
+            id: "http://qroxy.cn/2019/08/26/md-picpool/index.html".substr(19,50),      // Ensure uniqueness and length less than 50
+            distractionFreeMode: false  // Facebook-like distraction free mode
+        })
+
+        gitalk.render('gitalk-container')
+    </script>
+</div>
+    </div>
+</div>
+</div>
+                
+
+
+
+
+<div class="column is-4-tablet is-4-desktop is-3-widescreen  has-order-1 column-left ">
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <nav class="level">
+            <div class="level-item has-text-centered" style="flex-shrink: 1">
+                <div>
+                    
+                        <figure class="image is-128x128 has-mb-6">
+                            <img class="is-rounded" src="/images/avatar.png" alt="Qroxy">
+                        </figure>
+                    
+                    
+                    <p class="is-size-4 is-block">
+                        Qroxy
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-block">
+                        Java Developer
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-flex is-flex-center has-text-grey">
+                        <i class="fas fa-map-marker-alt has-mr-7"></i>
+                        <span>ShenZhen</span>
+                    </p>
+                    
+                </div>
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        文章
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        14
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        分类
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        5
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        标签
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        9
+                    </p>
+                </div>
+            </div>
+        </nav>
+        <div class="level">
+            <a class="level-item button is-link is-rounded" href="https://github.com/Qroxyquan" target="_blank">
+                关注我</a>
+        </div>
+        
+        
+        <div class="level is-mobile">
+            
+            <a class="level-item button is-white is-marginless" target="_blank"
+                title="Github" href="https://github.com/Qroxyquan">
+                
+                <i class="fab fa-github"></i>
+                
+            </a>
+            
+        </div>
+        
+    </div>
+</div>
+    
+        
+<div class="card widget" id="toc">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                目录
+            </h3>
+            <ul class="menu-list"><li>
+        <a class="is-flex" href="#PicGo">
+        <span class="has-mr-6">1</span>
+        <span>PicGo</span>
+        </a></li><li>
+        <a class="is-flex" href="#一、阿里对象存储OSS-PicGo">
+        <span class="has-mr-6">2</span>
+        <span>一、阿里对象存储OSS +PicGo</span>
+        </a><ul class="menu-list"><ul class="menu-list"><li>
+        <a class="is-flex" href="#然后新建Bucket">
+        <span class="has-mr-6">2.1.1</span>
+        <span>然后新建Bucket</span>
+        </a></li><li>
+        <a class="is-flex" href="#使用PicGo配置OSS：">
+        <span class="has-mr-6">2.1.2</span>
+        <span>使用PicGo配置OSS：</span>
+        </a></li></ul><li>
+        <a class="is-flex" href="#java自定义开发实例：">
+        <span class="has-mr-6">2.2</span>
+        <span>java自定义开发实例：</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#引入SDk">
+        <span class="has-mr-6">2.2.1</span>
+        <span>引入SDk</span>
+        </a></li><li>
+        <a class="is-flex" href="#OSS工具类">
+        <span class="has-mr-6">2.2.2</span>
+        <span>OSS工具类</span>
+        </a></li></ul></li></ul></li><li>
+        <a class="is-flex" href="#二、github-PicGo">
+        <span class="has-mr-6">3</span>
+        <span>二、github +PicGo</span>
+        </a><ul class="menu-list"><ul class="menu-list"><li>
+        <a class="is-flex" href="#新建一个Repository">
+        <span class="has-mr-6">3.1.1</span>
+        <span>新建一个Repository</span>
+        </a></li><li>
+        <a class="is-flex" href="#生产授权token">
+        <span class="has-mr-6">3.1.2</span>
+        <span>生产授权token</span>
+        </a></li><li>
+        <a class="is-flex" href="#配置PicGo">
+        <span class="has-mr-6">3.1.3</span>
+        <span>配置PicGo</span>
+        </a></li></ul></ul></li><li>
+        <a class="is-flex" href="#三、如何使用PicGo">
+        <span class="has-mr-6">4</span>
+        <span>三、如何使用PicGo</span>
+        </a></li></ul>
+        </div>
+    </div>
+</div>
+
+    
+    
+        <div class="column-right-shadow is-hidden-widescreen ">
+        
+            
+<div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                分类
+            </h3>
+            <ul class="menu-list">
+            <li>
+        <a class="level is-marginless" href="/categories/java/">
+            <span class="level-start">
+                <span class="level-item">java</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">2</span>
+            </span>
+        </a><ul><li>
+        <a class="level is-marginless" href="/categories/java/Spring/">
+            <span class="level-start">
+                <span class="level-item">Spring</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li></ul></li><li>
+        <a class="level is-marginless" href="/categories/markdown/">
+            <span class="level-start">
+                <span class="level-item">markdown</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a><ul><li>
+        <a class="level is-marginless" href="/categories/markdown/java/">
+            <span class="level-start">
+                <span class="level-item">java</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li></ul></li><li>
+        <a class="level is-marginless" href="/categories/运维/">
+            <span class="level-start">
+                <span class="level-item">运维</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+        
+            
+<div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            标签云
+        </h3>
+        <a href="/tags/frp/" style="font-size: 10px;">frp</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/markdown/" style="font-size: 10px;">markdown</a> <a href="/tags/md/" style="font-size: 10px;">md</a> <a href="/tags/springboot/" style="font-size: 20px;">springboot</a> <a href="/tags/远程/" style="font-size: 10px;">远程</a> <a href="/tags/阿里云/" style="font-size: 10px;">阿里云</a> <a href="/tags/阿里云OSS/" style="font-size: 10px;">阿里云OSS</a> <a href="/tags/面试/" style="font-size: 10px;">面试</a>
+    </div>
+</div>
+
+        
+            
+<div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            最新文章
+        </h3>
+        
+        <article class="media">
+            
+            <a href="/2020/01/21/frps/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="frp内网穿透实现远程">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-01-21T01:23:06.000Z">2020-01-21</time></div>
+                    <a href="/2020/01/21/frps/" class="title has-link-black-ter is-size-6 has-text-weight-normal">frp内网穿透实现远程</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/运维/">运维</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2019/08/26/md-picpool/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="md技巧-配置自己的图床（两种方式）">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-08-26T05:34:45.000Z">2019-08-26</time></div>
+                    <a href="/2019/08/26/md-picpool/" class="title has-link-black-ter is-size-6 has-text-weight-normal">md技巧-配置自己的图床（两种方式）</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/markdown/">markdown</a> / <a class="has-link-grey -link" href="/categories/markdown/java/">java</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2019/08/20/how-to-use-springboot/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="如何使用Springboot">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-08-20T01:55:47.000Z">2019-08-20</time></div>
+                    <a href="/2019/08/20/how-to-use-springboot/" class="title has-link-black-ter is-size-6 has-text-weight-normal">如何使用Springboot</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/java/">java</a> / <a class="has-link-grey -link" href="/categories/java/Spring/">Spring</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2019/06/03/Java面试必备/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="Java面试必备">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-06-03T02:32:20.000Z">2019-06-03</time></div>
+                    <a href="/2019/06/03/Java面试必备/" class="title has-link-black-ter is-size-6 has-text-weight-normal">Java面试必备</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/java/">java</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2018/11/03/关于JAVA对象的序列化与反序列化的学习与理解/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="关于JAVA对象的序列化与反序列化的学习与理解">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2018-11-03T05:30:33.000Z">2018-11-03</time></div>
+                    <a href="/2018/11/03/关于JAVA对象的序列化与反序列化的学习与理解/" class="title has-link-black-ter is-size-6 has-text-weight-normal">关于JAVA对象的序列化与反序列化的学习与理解</a>
+                    <p class="is-size-7 is-uppercase">
+                        
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+    </div>
+</div>
+
+        
+            <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            归档
+        </h3>
+        <ul class="menu-list">
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2020/01/">
+                <span class="level-start">
+                    <span class="level-item">一月 2020</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/08/">
+                <span class="level-start">
+                    <span class="level-item">八月 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/06/">
+                <span class="level-start">
+                    <span class="level-item">六月 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/11/">
+                <span class="level-start">
+                    <span class="level-item">十一月 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/10/">
+                <span class="level-start">
+                    <span class="level-item">十月 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/09/">
+                <span class="level-start">
+                    <span class="level-item">九月 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/08/">
+                <span class="level-start">
+                    <span class="level-item">八月 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/07/">
+                <span class="level-start">
+                    <span class="level-item">七月 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">4</span>
+                </span>
+            </a>
+        </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+        
+        </div>
+    
+</div>
+
+                
+
+
+
+
+<div class="column is-4-tablet is-4-desktop is-3-widescreen is-hidden-touch is-hidden-desktop-only has-order-3 column-right ">
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                分类
+            </h3>
+            <ul class="menu-list">
+            <li>
+        <a class="level is-marginless" href="/categories/java/">
+            <span class="level-start">
+                <span class="level-item">java</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">2</span>
+            </span>
+        </a><ul><li>
+        <a class="level is-marginless" href="/categories/java/Spring/">
+            <span class="level-start">
+                <span class="level-item">Spring</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li></ul></li><li>
+        <a class="level is-marginless" href="/categories/markdown/">
+            <span class="level-start">
+                <span class="level-item">markdown</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a><ul><li>
+        <a class="level is-marginless" href="/categories/markdown/java/">
+            <span class="level-start">
+                <span class="level-item">java</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li></ul></li><li>
+        <a class="level is-marginless" href="/categories/运维/">
+            <span class="level-start">
+                <span class="level-item">运维</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
+            </span>
+        </a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            标签云
+        </h3>
+        <a href="/tags/frp/" style="font-size: 10px;">frp</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/markdown/" style="font-size: 10px;">markdown</a> <a href="/tags/md/" style="font-size: 10px;">md</a> <a href="/tags/springboot/" style="font-size: 20px;">springboot</a> <a href="/tags/远程/" style="font-size: 10px;">远程</a> <a href="/tags/阿里云/" style="font-size: 10px;">阿里云</a> <a href="/tags/阿里云OSS/" style="font-size: 10px;">阿里云OSS</a> <a href="/tags/面试/" style="font-size: 10px;">面试</a>
+    </div>
+</div>
+
+    
+        
+<div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            最新文章
+        </h3>
+        
+        <article class="media">
+            
+            <a href="/2020/01/21/frps/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="frp内网穿透实现远程">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-01-21T01:23:06.000Z">2020-01-21</time></div>
+                    <a href="/2020/01/21/frps/" class="title has-link-black-ter is-size-6 has-text-weight-normal">frp内网穿透实现远程</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/运维/">运维</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2019/08/26/md-picpool/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="md技巧-配置自己的图床（两种方式）">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-08-26T05:34:45.000Z">2019-08-26</time></div>
+                    <a href="/2019/08/26/md-picpool/" class="title has-link-black-ter is-size-6 has-text-weight-normal">md技巧-配置自己的图床（两种方式）</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/markdown/">markdown</a> / <a class="has-link-grey -link" href="/categories/markdown/java/">java</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2019/08/20/how-to-use-springboot/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="如何使用Springboot">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-08-20T01:55:47.000Z">2019-08-20</time></div>
+                    <a href="/2019/08/20/how-to-use-springboot/" class="title has-link-black-ter is-size-6 has-text-weight-normal">如何使用Springboot</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/java/">java</a> / <a class="has-link-grey -link" href="/categories/java/Spring/">Spring</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2019/06/03/Java面试必备/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="Java面试必备">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2019-06-03T02:32:20.000Z">2019-06-03</time></div>
+                    <a href="/2019/06/03/Java面试必备/" class="title has-link-black-ter is-size-6 has-text-weight-normal">Java面试必备</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/java/">java</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/2018/11/03/关于JAVA对象的序列化与反序列化的学习与理解/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/thumbnail.svg" alt="关于JAVA对象的序列化与反序列化的学习与理解">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2018-11-03T05:30:33.000Z">2018-11-03</time></div>
+                    <a href="/2018/11/03/关于JAVA对象的序列化与反序列化的学习与理解/" class="title has-link-black-ter is-size-6 has-text-weight-normal">关于JAVA对象的序列化与反序列化的学习与理解</a>
+                    <p class="is-size-7 is-uppercase">
+                        
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+    </div>
+</div>
+
+    
+        <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+        <h3 class="menu-label">
+            归档
+        </h3>
+        <ul class="menu-list">
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2020/01/">
+                <span class="level-start">
+                    <span class="level-item">一月 2020</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/08/">
+                <span class="level-start">
+                    <span class="level-item">八月 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2019/06/">
+                <span class="level-start">
+                    <span class="level-item">六月 2019</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/11/">
+                <span class="level-start">
+                    <span class="level-item">十一月 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/10/">
+                <span class="level-start">
+                    <span class="level-item">十月 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">1</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/09/">
+                <span class="level-start">
+                    <span class="level-item">九月 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/08/">
+                <span class="level-start">
+                    <span class="level-item">八月 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">2</span>
+                </span>
+            </a>
+        </li>
+        
+        <li>
+            <a class="level is-marginless" href="/archives/2018/07/">
+                <span class="level-start">
+                    <span class="level-item">七月 2018</span>
+                </span>
+                <span class="level-end">
+                    <span class="level-item tag">4</span>
+                </span>
+            </a>
+        </li>
+        
+        </ul>
+        </div>
+    </div>
+</div>
+    
+    
+</div>
+
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+    <div class="container">
+        <div class="level">
+            <div class="level-start has-text-centered-mobile">
+                <a class="footer-logo is-block has-mb-6" href="/">
+                
+                    <img src="/images/avatar.png" alt="md技巧-配置自己的图床（两种方式）" height="28">
+                
+                </a>
+                <p class="is-size-7">
+                &copy; 2020 ZhenQuan&nbsp;
+                Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a
+                        href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank">Icarus</a><br/>
+<h6>本博客所有文章，除特别申明外，均遵循 CC BY-NC-SA 4.0 协议，请务必知悉。
+</h6>
+<h6>粤 ICP备 17042306 号</h6>
+                
+                </p>
+            </div>
+            <div class="level-end">
+            
+                <div class="field has-addons is-flex-center-mobile has-mt-5-mobile is-flex-wrap is-flex-middle">
+                
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" title="Creative Commons" href="https://creativecommons.org/">
+                        
+                        <i class="fab fa-creative-commons"></i>
+                        
+                    </a>
+                </p>
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/">
+                        
+                        <i class="fab fa-creative-commons-by"></i>
+                        
+                    </a>
+                </p>
+                
+                <p class="control">
+                    <a class="button is-white is-large" target="_blank" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                </p>
+                
+                </div>
+            
+            </div>
+        </div>
+    </div>
+
+</footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script>
+<script>moment.locale("zh-CN");</script>
+
+<script>
+var IcarusThemeSettings = {
+    article: {
+        highlight: {
+            clipboard: true,
+            fold: 'unfolded'
+        }
+    }
+};
+</script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script>
+
+
+
+    
+    
+    
+    <script src="/js/animation.js"></script>
+    
+
+    
+    
+    
+    <script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script>
+    <script src="/js/gallery.js" defer></script>
+    
+
+    
+    
+
+<div id="outdated">
+    <h6>Your browser is out-of-date!</h6>
+    <p>Update your browser to view this website correctly. <a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update
+            my browser now </a></p>
+    <p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">&times;</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        outdatedBrowser({
+            bgColor: '#f25648',
+            color: '#ffffff',
+            lowerThan: 'flex'
+        });
+    });
+</script>
+
+
+    
+    
+<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    MathJax.Hub.Config({
+        'HTML-CSS': {
+            matchFontHeight: false
+        },
+        SVG: {
+            matchFontHeight: false
+        },
+        CommonHTML: {
+            matchFontHeight: false
+        },
+        tex2jax: {
+            inlineMath: [
+                ['$','$'],
+                ['\\(','\\)']
+            ]
+        }
+    });
+});
+</script>
+
+    
+    
+
+<a id="back-to-top" title="回到顶端" href="javascript:;">
+    <i class="fas fa-chevron-up"></i>
+</a>
+<script src="/js/back-to-top.js" defer></script>
+
+
+    
+    
+
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+
+
+<script src="/js/main.js" defer></script>
+
+    
+    <div class="searchbox ins-search">
+    <div class="searchbox-container ins-search-container">
+        <div class="searchbox-input-wrapper">
+            <input type="text" class="searchbox-input ins-search-input" placeholder="想要查找什么..." />
+            <span class="searchbox-close ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="searchbox-result-wrapper ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: '文章',
+                PAGES: '页面',
+                CATEGORIES: '分类',
+                TAGS: '标签',
+                UNTITLED: '(无标题)',
+            },
+            CONTENT_URL: '/content.json',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script src="/js/insight.js" defer></script>
+<link rel="stylesheet" href="/css/search.css">
+<link rel="stylesheet" href="/css/insight.css">
+    
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"left","width":100,"height":200},"mobile":{"show":false},"log":false});</script></body>
+</html>
